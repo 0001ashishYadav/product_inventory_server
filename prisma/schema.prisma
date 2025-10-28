@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Roles {
+  USER
+  ADMIN
+}
+
+model User {
+    id                Int                 @id @default(autoincrement())
+  email             String              @unique
+  name              String?
+  role              Roles               @default(USER)
+   entry  Entry[]
+    exit   Exit[]
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  minQuantity    Int   @default(0)
+  category    String?
+    inventory    Inventory[] 
+   entry       Entry[]
+    exit        Exit[]
+}
+
+model Inventory {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  product     Product  @relation(fields: [productId], references: [id])
+  quantity    Int      @default(0)
+  location    String?
+}
+
+model Entry {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  product     Product  @relation(fields: [productId], references: [id])
+  quantity    Int      @default(0)
+  price       Float    @default(0)
+  entryDate   DateTime @default(now())
+  notes       String?
+  addedBy     Int
+  user        User     @relation(fields: [addedBy], references: [id])
+}
+
+model Exit {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  product     Product  @relation(fields: [productId], references: [id])
+  quantity    Int      @default(0)
+  exitDate    DateTime @default(now())
+  reason      String?
+  removedBy   Int
+  user        User     @relation(fields: [removedBy], references: [id])
+}
