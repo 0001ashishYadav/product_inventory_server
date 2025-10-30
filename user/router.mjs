@@ -1,8 +1,8 @@
 import express from "express";
-import { login } from "./controller.mjs";
+import { login, signup } from "./controller.mjs";
 
 const userRouter = express.Router();
 
-userRouter.get("/", login);
+userRouter.post("/login", login).post("/signup", signup);
 
 export default userRouter;
