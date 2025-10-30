@@ -1,11 +1,57 @@
-import { errorPritify, UserSignupModel } from "./validation.mjs";
+import {
+  errorPritify,
+  UserLoginModel,
+  UserSignupModel,
+} from "./validation.mjs";
 import { ServerError } from "../error.mjs";
 import bcrypt from "bcrypt";
 import { generateSecureRandomString } from "../utils.mjs";
 import { DB_ERR_CODES, prisma, Prisma } from "../prisma/db.mjs";
+import { asyncJwtSign } from "../async.jwt.mjs";
 
-const login = (req, res, next) => {
-  res.json({ message: "Login successful" });
+const login = async (req, res, next) => {
+  const result = await UserLoginModel.safeParseAsync(req.body);
+  if (!result.success) {
+    throw new ServerError(400, errorPritify(result));
+  }
+
+  // find user by email from DB
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email: req.body.email,
+    },
+  });
+
+  console.log(user);
+
+  if (!user) {
+    throw new ServerError(404, "user is not found");
+  }
+
+  // if (!user.accountVerified) {
+  //   throw new ServerError(404, "verify you account first");
+  // }
+
+  if (!(await bcrypt.compare(req.body.password, user.password))) {
+    throw new ServerError(401, "password mismatch");
+  }
+
+  const token = await asyncJwtSign(
+    { id: user.id, name: user.name, email: user.email, role: user.role },
+    process.env.TOKEN_SECRET,
+    { expiresIn: process.env.TOKEN_EXPIRY_TIME }
+  );
+
+  res.json({
+    msg: "login successful",
+    token,
+    expiresIn: process.env.TOKEN_EXPIRY_TIME,
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  });
 };
 
 const signup = async (req, res, next) => {
