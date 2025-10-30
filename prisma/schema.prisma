@@ -23,6 +23,7 @@ model User {
     id                Int                 @id @default(autoincrement())
   email             String              @unique
   name              String?
+  password          String?
   role              Roles               @default(USER)
    entry  Entry[]
     exit   Exit[]
@@ -31,12 +32,18 @@ model User {
 model Product {
   id          Int      @id @default(autoincrement())
   name        String
+  skuId         String   @unique
   description String?
   minQuantity    Int   @default(0)
   category    String?
     inventory    Inventory[] 
    entry       Entry[]
     exit        Exit[]
+}
+
+model Categories {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
 }
 
 model Inventory {
