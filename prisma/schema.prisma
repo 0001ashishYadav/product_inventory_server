@@ -20,59 +20,55 @@ enum Roles {
 }
 
 model User {
-    id                Int                 @id @default(autoincrement())
-  email             String              @unique
-  name              String?
-  password          String?
-  role              Roles               @default(USER)
-   entry  Entry[]
-    exit   Exit[]
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  name     String?
+  password String?
+  role     Roles   @default(USER)
+  entry    Entry[]
+  exit     Exit[]
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  name        String
-  skuId         String   @unique
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  skuId       String      @unique
   description String?
-  minQuantity    Int   @default(0)
+  minQuantity Int         @default(0)
   category    String?
-    inventory    Inventory[] 
-   entry       Entry[]
-    exit        Exit[]
-}
-
-model Categories {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
+  inventory   Inventory[]
+  entry       Entry[]
+  exit        Exit[]
 }
 
 model Inventory {
-  id          Int      @id @default(autoincrement())
-  productId   Int
-  product     Product  @relation(fields: [productId], references: [id])
-  quantity    Int      @default(0)
-  location    String?
+  id        Int     @id @default(autoincrement())
+  productId Int     @unique
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(0)
+  location  String?
 }
 
 model Entry {
-  id          Int      @id @default(autoincrement())
-  productId   Int
-  product     Product  @relation(fields: [productId], references: [id])
-  quantity    Int      @default(0)
-  price       Float    @default(0)
-  entryDate   DateTime @default(now())
-  notes       String?
-  addedBy     Int
-  user        User     @relation(fields: [addedBy], references: [id])
+  id        Int      @id @default(autoincrement())
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int      @default(0)
+  price     Float    @default(0)
+  entryDate DateTime @default(now())
+  notes     String?
+  addedBy   Int
+  user      User     @relation(fields: [addedBy], references: [id])
 }
 
 model Exit {
-  id          Int      @id @default(autoincrement())
-  productId   Int
-  product     Product  @relation(fields: [productId], references: [id])
-  quantity    Int      @default(0)
-  exitDate    DateTime @default(now())
-  reason      String?
-  removedBy   Int
-  user        User     @relation(fields: [removedBy], references: [id])
+  id        Int      @id @default(autoincrement())
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int      @default(0)
+  price     Float    @default(0)
+  exitDate  DateTime @default(now())
+  reason    String?
+  removedBy Int
+  user      User     @relation(fields: [removedBy], references: [id])
 }
