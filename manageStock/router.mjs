@@ -1,16 +1,20 @@
 import express from "express";
 import {
   addProduct,
+  getAllInventory,
+  getAllUsers,
+  getProducts,
   productEntry,
   productExit,
-  products,
 } from "./controller.mjs";
 
 const manageStockRouter = express.Router();
 
 manageStockRouter
-  .get("/products", products)
-  .post("addProduct", addProduct)
+  .get("/getProducts", getProducts)
+  .get("/getAllInventory", getAllInventory)
+  .get("/getAllUsers", getAllUsers)
+  .post("/addProduct", addProduct)
   .post("/productEntry", productEntry)
   .post("/productExit", productExit);
 
