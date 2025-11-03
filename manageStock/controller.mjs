@@ -1,3 +1,4 @@
+import { en } from "zod/v4/locales";
 import { ServerError } from "../error.mjs";
 import { DB_ERR_CODES, prisma } from "../prisma/db.mjs";
 
@@ -53,7 +54,16 @@ const getAllInventory = async (req, res, next) => {
 
 const getAllUsers = async (req, res, next) => {
   try {
-    const allUsers = await prisma.user.findMany();
+    const allUsers = await prisma.user.findMany({
+      include: {
+        _count: {
+          select: {
+            entry: true,
+            exit: true,
+          },
+        },
+      },
+    });
 
     res.json({ message: "All Team Members", allUsers });
   } catch (error) {
