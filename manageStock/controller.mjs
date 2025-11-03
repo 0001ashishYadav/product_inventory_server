@@ -64,39 +64,72 @@ const getAllUsers = async (req, res, next) => {
 
 const getAllEntries = async (req, res, next) => {
   try {
-    const enteries = await prisma.entry.findMany({
-      include: {
-        product: {
-          select: { name: true },
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 7;
+    const skip = (page - 1) * limit;
+
+    const [entries, totalCount] = await Promise.all([
+      prisma.entry.findMany({
+        include: {
+          product: { select: { name: true } },
+          user: { select: { id: true, name: true } },
         },
-        user: {
-          select: { id: true, name: true },
-        },
+        orderBy: { entryDate: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.entry.count(),
+    ]);
+
+    res.json({
+      message: "Entries fetched successfully",
+      data: entries,
+      pagination: {
+        totalItems: totalCount,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        limit,
       },
     });
-
-    res.json({ message: "Get all entries successfully", enteries });
   } catch (error) {
     console.log(error);
-    throw new ServerError(500, "unable to fetch entries");
+    next(new ServerError(500, "Unable to fetch entries"));
   }
 };
 
 const getAllExits = async (req, res, next) => {
   try {
-    const exits = await prisma.exit.findMany({
-      include: {
-        product: {
-          select: { name: true },
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 7;
+    const skip = (page - 1) * limit;
+
+    const [exits, totalCount] = await Promise.all([
+      prisma.exit.findMany({
+        include: {
+          product: { select: { name: true } },
+          user: { select: { id: true, name: true } },
         },
-        user: {
-          select: { id: true, name: true },
-        },
+        orderBy: { exitDate: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.exit.count(),
+    ]);
+
+    res.json({
+      message: "Exits fetched successfully",
+      data: exits,
+      pagination: {
+        totalItems: totalCount,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        limit,
       },
     });
-
-    res.json({ message: "Get all exits", exits });
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+    next(new ServerError(500, "Unable to fetch exits"));
+  }
 };
 
 const addProduct = async (req, res, next) => {
