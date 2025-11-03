@@ -1,6 +1,8 @@
 import express from "express";
 import {
   addProduct,
+  getAllEntries,
+  getAllExits,
   getAllInventory,
   getAllUsers,
   getProducts,
@@ -14,6 +16,8 @@ manageStockRouter
   .get("/getProducts", getProducts)
   .get("/getAllInventory", getAllInventory)
   .get("/getAllUsers", getAllUsers)
+  .get("/getAllEntries", getAllEntries)
+  .get("/getAllExits", getAllExits)
   .post("/addProduct", addProduct)
   .post("/productEntry", productEntry)
   .post("/productExit", productExit);

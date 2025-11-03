@@ -62,6 +62,43 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 
+const getAllEntries = async (req, res, next) => {
+  try {
+    const enteries = await prisma.entry.findMany({
+      include: {
+        product: {
+          select: { name: true },
+        },
+        user: {
+          select: { id: true, name: true },
+        },
+      },
+    });
+
+    res.json({ message: "Get all entries successfully", enteries });
+  } catch (error) {
+    console.log(error);
+    throw new ServerError(500, "unable to fetch entries");
+  }
+};
+
+const getAllExits = async (req, res, next) => {
+  try {
+    const exits = await prisma.exit.findMany({
+      include: {
+        product: {
+          select: { name: true },
+        },
+        user: {
+          select: { id: true, name: true },
+        },
+      },
+    });
+
+    res.json({ message: "Get all exits", exits });
+  } catch (error) {}
+};
+
 const addProduct = async (req, res, next) => {
   try {
     const { name, skuId, description, minQuantity, category } = req.body;
@@ -165,6 +202,8 @@ export {
   getProducts,
   getAllInventory,
   getAllUsers,
+  getAllEntries,
+  getAllExits,
   addProduct,
   productEntry,
   productExit,
