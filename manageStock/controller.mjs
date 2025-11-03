@@ -1,22 +1,28 @@
+import { ServerError } from "../error.mjs";
 import { DB_ERR_CODES, prisma } from "../prisma/db.mjs";
 
 const getProducts = async (req, res, next) => {
   // const products = await prisma.product.findMany();
 
-  const products = await prisma.product.findMany({
-    include: {
-      inventory: {
-        select: { quantity: true },
+  try {
+    const products = await prisma.product.findMany({
+      include: {
+        inventory: {
+          select: { quantity: true },
+        },
+        entry: {
+          orderBy: { entryDate: "desc" },
+          take: 1, // get only the latest entry (for latest price)
+          select: { price: true, quantity: true },
+        },
       },
-      entry: {
-        orderBy: { entryDate: "desc" },
-        take: 1, // get only the latest entry (for latest price)
-        select: { price: true, quantity: true },
-      },
-    },
-  });
+    });
 
-  res.json({ message: "Products retrieved successfully", products });
+    res.json({ message: "Products retrieved successfully", products });
+  } catch (error) {
+    console.error(error);
+    throw new ServerError(500, "unable to fetch products");
+  }
 };
 
 const getAllInventory = async (req, res, next) => {
@@ -41,14 +47,19 @@ const getAllInventory = async (req, res, next) => {
     res.json({ message: "All inventories", inventories });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error fetching inventories", error });
+    throw new ServerError(500, "unable to fetch inventories");
   }
 };
 
 const getAllUsers = async (req, res, next) => {
-  const allUsers = await prisma.user.findMany();
+  try {
+    const allUsers = await prisma.user.findMany();
 
-  res.json({ message: "All Team Members", allUsers });
+    res.json({ message: "All Team Members", allUsers });
+  } catch (error) {
+    console.log(error);
+    throw new ServerError(500, "unable to fetch users");
+  }
 };
 
 const addProduct = async (req, res, next) => {
@@ -95,19 +106,24 @@ const productEntry = async (req, res, next) => {
   console.log(req.body); // ✅ check these are not undefined
 
   // When adding an entry
-  const newEntry = await prisma.$transaction(async (tx) => {
-    await tx.entry.create({
-      data: { productId, quantity, price, notes, addedBy },
+  try {
+    const newEntry = await prisma.$transaction(async (tx) => {
+      await tx.entry.create({
+        data: { productId, quantity, price, notes, addedBy },
+      });
+
+      await tx.inventory.upsert({
+        where: { productId: productId },
+        update: { quantity: { increment: quantity } },
+        create: { productId: productId, quantity: quantity },
+      });
     });
 
-    await tx.inventory.upsert({
-      where: { productId: productId },
-      update: { quantity: { increment: quantity } },
-      create: { productId: productId, quantity: quantity },
-    });
-  });
-
-  res.json({ message: "Product entry recorded successfully", newEntry });
+    res.json({ message: "Product entry recorded successfully", newEntry });
+  } catch (error) {
+    console.log(error);
+    throw new ServerError(500, "unable to record product entry");
+  }
 };
 
 const productExit = async (req, res, next) => {
@@ -115,29 +131,34 @@ const productExit = async (req, res, next) => {
 
   console.log(req.body); // ✅ check these are not undefined
 
-  const exitItem = await prisma.$transaction(async (tx) => {
-    const inventory = await tx.inventory.findUnique({
-      where: { productId: productId },
-      select: { quantity: true },
+  try {
+    const exitItem = await prisma.$transaction(async (tx) => {
+      const inventory = await tx.inventory.findUnique({
+        where: { productId: productId },
+        select: { quantity: true },
+      });
+
+      if (!inventory || inventory.quantity < quantity) {
+        throw new Error("Not enough stock to remove");
+      }
+
+      const exit = await tx.exit.create({
+        data: { productId, quantity, price, reason, removedBy },
+      });
+
+      await tx.inventory.update({
+        where: { productId: productId },
+        data: { quantity: { decrement: quantity } },
+      });
+
+      return exit;
     });
 
-    if (!inventory || inventory.quantity < quantity) {
-      throw new Error("Not enough stock to remove");
-    }
-
-    const exit = await tx.exit.create({
-      data: { productId, quantity, price, reason, removedBy },
-    });
-
-    await tx.inventory.update({
-      where: { productId: productId },
-      data: { quantity: { decrement: quantity } },
-    });
-
-    return exit;
-  });
-
-  res.json({ message: "Product exit recorded successfully", exitItem });
+    res.json({ message: "Product exit recorded successfully", exitItem });
+  } catch (error) {
+    console.log(error);
+    throw new ServerError(500, "unable to record product exit");
+  }
 };
 
 export {
