@@ -12,7 +12,7 @@ const getProducts = async (req, res, next) => {
           select: { quantity: true },
         },
         entry: {
-          orderBy: { entryDate: "desc" },
+          orderBy: { date: "desc" },
           take: 1, // get only the latest entry (for latest price)
           select: { price: true, quantity: true },
         },
@@ -36,7 +36,7 @@ const getAllInventory = async (req, res, next) => {
             category: true,
             minQuantity: true,
             entry: {
-              orderBy: { entryDate: "desc" },
+              orderBy: { date: "desc" },
               take: 1, // get only the latest entry (for latest price)
               select: { price: true },
             },
@@ -84,7 +84,7 @@ const getAllEntries = async (req, res, next) => {
           product: { select: { name: true } },
           user: { select: { id: true, name: true } },
         },
-        orderBy: { entryDate: "desc" },
+        orderBy: { date: "desc" },
         skip,
         take: limit,
       }),
@@ -119,7 +119,7 @@ const getAllExits = async (req, res, next) => {
           product: { select: { name: true } },
           user: { select: { id: true, name: true } },
         },
-        orderBy: { exitDate: "desc" },
+        orderBy: { date: "desc" },
         skip,
         take: limit,
       }),
