@@ -176,7 +176,7 @@ const addProduct = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Error adding product:", error);
-    next(error);
+    next(new ServerError(500, "unable to add product"));
   }
 };
 
@@ -202,7 +202,7 @@ const productEntry = async (req, res, next) => {
     res.json({ message: "Product entry recorded successfully", newEntry });
   } catch (error) {
     console.log(error);
-    throw new ServerError(500, "unable to record product entry");
+    next(new ServerError(500, "unable to record product entry"));
   }
 };
 
@@ -237,7 +237,7 @@ const productExit = async (req, res, next) => {
     res.json({ message: "Product exit recorded successfully", exitItem });
   } catch (error) {
     console.log(error);
-    throw new ServerError(500, "unable to record product exit");
+    next(new ServerError(500, "unable to record product exit"));
   }
 };
 
