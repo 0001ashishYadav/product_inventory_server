@@ -52,26 +52,6 @@ const getAllInventory = async (req, res, next) => {
   }
 };
 
-const getAllUsers = async (req, res, next) => {
-  try {
-    const allUsers = await prisma.user.findMany({
-      include: {
-        _count: {
-          select: {
-            entry: true,
-            exit: true,
-          },
-        },
-      },
-    });
-
-    res.json({ message: "All Team Members", allUsers });
-  } catch (error) {
-    console.log(error);
-    throw new ServerError(500, "unable to fetch users");
-  }
-};
-
 const getAllEntries = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -244,7 +224,6 @@ const productExit = async (req, res, next) => {
 export {
   getProducts,
   getAllInventory,
-  getAllUsers,
   getAllEntries,
   getAllExits,
   addProduct,

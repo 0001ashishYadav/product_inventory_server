@@ -4,7 +4,6 @@ import {
   getAllEntries,
   getAllExits,
   getAllInventory,
-  getAllUsers,
   getProducts,
   productEntry,
   productExit,
@@ -15,7 +14,6 @@ const manageStockRouter = express.Router();
 manageStockRouter
   .get("/getProducts", getProducts)
   .get("/getAllInventory", getAllInventory)
-  .get("/getAllUsers", getAllUsers)
   .get("/getAllEntries", getAllEntries)
   .get("/getAllExits", getAllExits)
   .post("/addProduct", addProduct)

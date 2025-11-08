@@ -100,4 +100,24 @@ const signup = async (req, res, next) => {
 
   res.json({ msg: "signup is successful" });
 };
-export { login, signup };
+
+const getAllUsers = async (req, res, next) => {
+  try {
+    const allUsers = await prisma.user.findMany({
+      include: {
+        _count: {
+          select: {
+            entry: true,
+            exit: true,
+          },
+        },
+      },
+    });
+
+    res.json({ message: "All Team Members", allUsers });
+  } catch (error) {
+    console.log(error);
+    throw new ServerError(500, "unable to fetch users");
+  }
+};
+export { login, signup, getAllUsers };
