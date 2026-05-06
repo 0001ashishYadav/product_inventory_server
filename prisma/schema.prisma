@@ -20,13 +20,14 @@ enum Roles {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  name     String?
-  password String?
-  role     Roles   @default(USER)
-  entry    Entry[]
-  exit     Exit[]
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String?
+  createdAt DateTime @default(now())
+  role      Roles    @default(USER)
+  entry     Entry[]
+  exit      Exit[]
 }
 
 model Product {
